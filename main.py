@@ -51,8 +51,12 @@ def run_flask():
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
 
-# Overlord Manager Bot (Owner DM နှင့် Logic များကို စောင့်ကြည့်တင်ပြရန်)
-bot = TelegramClient('manager_bot', API_ID, API_HASH)
+# ─── 🔄 GLOBAL ASYNCIO LOOP FIX FOR PYTHON 3.14 ───
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+
+# Overlord Manager Bot (ဆောက်ထားတဲ့ loop ကို explicit လှမ်းပေးလိုက်ပါတယ်)
+bot = TelegramClient('manager_bot', API_ID, API_HASH, loop=loop)
 
 # ========================================================
 # 🔑 AGENT ACTIVATION RUNTIME (UP TO 4 ACCOUNTS)
@@ -285,5 +289,6 @@ async def main_execution_grid():
     await bot.run_until_disconnected()
 
 if __name__ == '__main__':
-    asyncio.run(main_execution_grid())
-                  
+    # asyncio.run() အစား အပေါ်က ဆောက်ခဲ့တဲ့ loop နဲ့ တိုက်ရိုက် run စေခြင်း
+    loop.run_until_complete(main_execution_grid())
+    
